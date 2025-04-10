@@ -17,6 +17,10 @@ const palette = {
     primary: '#191A1F',  // Primary text color
     secondary: '#FF6436', // Secondary text color
   },
+  button: {
+    primary: '#FF6436',
+    secondary: '#36a420'
+  }
 };
 
 
