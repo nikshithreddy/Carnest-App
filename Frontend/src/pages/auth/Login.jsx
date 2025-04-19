@@ -24,7 +24,9 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError({});
     setLoginSuccess(false);
+    
     const data = new FormData(e.currentTarget);
     const actualData = {
       email: data.get("email"),
@@ -34,9 +36,10 @@ const Login = () => {
     try {
       const res = await loginUser(actualData);
       if (res.error) {
-        setServerError(res.error.data.errors);
+        setServerError(res.error.data.errors || {});
         setLoginSuccess(false);
       } else if (res.data) {
+        setServerError({});
         setLoginSuccess(true);
         storeToken(res.data.token);
         setTimeout(() => {
@@ -166,19 +169,24 @@ const Login = () => {
             }}
           />
 
-          <Link
-            href="/forgotpassword"
-            sx={{ 
-              display: 'block', 
-              textAlign: 'right',
-              color: theme.palette.text.secondary,
-              '&:hover': {
-                color: theme.palette.button.secondary
-              }
-            }}
-          >
-            Forgot Password?
-          </Link>
+          <Box sx={{ mb: 2 }}>
+            <Link
+              href="/forgotpassword"
+              sx={{ 
+                display: 'block', 
+                textAlign: 'right',
+                color: theme.palette.text.secondary,
+                textDecoration: 'none',
+                fontWeight: 500,
+                '&:hover': {
+                  color: theme.palette.button.secondary,
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              Forgot Password?
+            </Link>
+          </Box>
 
           {isLoading ? (
             <CircularProgress sx={{ mt: 2 }} />
