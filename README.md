@@ -10,6 +10,9 @@
 - Contribute to a more eco-friendly transportation system by lowering the number of vehicles on the road.
 
 ## Features
+### 📐 UI Blueprint (Draft)
+Check out the initial Figma wireframe here:
+[View on Figma]([https://www.figma.com/…](https://www.figma.com/proto/O80XFVZ86tI9vywu71qy6n/Carnest?node-id=25-1055&t=HJ7K8JpeErYUO081-1&starting-point-node-id=25%3A763))
 
 - **User Authentication**: Secure sign-up, login, and profile management using JWT authentication.
 - **Ride Creation & Booking**: Users can create rides, search for available rides, and book seats based on their location and preferences.
