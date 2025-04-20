@@ -1,10 +1,11 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from users.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer, SendPasswordResetEmailSerializer, UserPasswordResetSerializer
+from users.serializers import UserRegistrationSerializer, UserLoginSerializer, UserChangePasswordSerializer, SendPasswordResetEmailSerializer, UserPasswordResetSerializer, UserProfileSerializer
 from django.contrib.auth import authenticate
 from users.renderers import UserRenderer
 from users.models import User
+from users.utils import IsAdminOrSelf
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -65,3 +66,38 @@ class UserPasswordResetView(APIView):
     serializer = UserPasswordResetSerializer(data=request.data, context={'uid':uid, 'token':token})
     serializer.is_valid(raise_exception=True)
     return Response({'msg':'Password Reset Successfully'}, status=status.HTTP_200_OK)
+  
+class UserProfileView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminOrSelf]
+
+    def get_user(self, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            # Check if the requesting user is either the same user or an admin
+            if not (self.request.user == user or self.request.user.is_admin):
+                raise PermissionError("You don't have permission to access this profile")
+            return user
+        except User.DoesNotExist:
+            raise Response({'error': 'User does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        except PermissionError as e:
+            raise Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+    def get(self, request, user_id=None, format=None):
+        try:
+            user = self.get_user(user_id) if user_id else request.user
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Response as e:
+            return e
+
+    def patch(self, request, user_id=None, format=None):
+        try:
+            user = self.get_user(user_id) if user_id else request.user
+            serializer = UserProfileSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Response as e:
+            return e

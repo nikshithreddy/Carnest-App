@@ -1,4 +1,5 @@
-import {BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
+import { useSelector } from "react-redux";
 
 import Layout from "./pages/Layout";
 import Search from "./pages/Search";
@@ -13,33 +14,37 @@ import ChangePassword from "./pages/auth/ChangePassword";
 import SendPasswordResetEmail from "./pages/auth/SendPasswordResetEmail";
 import ResetPassword from "./pages/auth/ResetPassword";
 import LandingPage from "./pages/LandingPage";
-
+import Vehicles from "./pages/Vehicles";
 
 function App() {
+  const { access_token } = useSelector((state) => state.auth);
 
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route index element={<LandingPage />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgotpassword" element={<ForgotPassword />} />
-          <Route path="/changepassword" element={<ChangePassword />} />
-          <Route path="/send-reset-password-email" element={<SendPasswordResetEmail />} />
-          <Route path="/api/user/reset/:id/:token" element={<ResetPassword />} />
-          <Route path="/userprofile" element={<UserProfile />} />
+          <Route path="/" element={<Layout />}>
+            {/* Public routes */}
+            <Route index element={access_token ? <Navigate to="/search" /> : <LandingPage />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgotpassword" element={<ForgotPassword />} />
+            <Route path="/send-reset-password-email" element={<SendPasswordResetEmail />} />
+            <Route path="api/user/reset/:id/:token" element={<ResetPassword />} />
 
-          {/* Should be Protected routes */}
-          <Route path="/search" element={<Search />} />
-          <Route path="/postride" element={<PostRide />} />
-          <Route path="/yourrides" element={<YourRides />} />
-          <Route path="/messages" element={<Messages />} />
-
+            {/* Protected routes - redirect to login if not authenticated */}
+            <Route path="/search" element={access_token ? <Search /> : <Navigate to="/login" />} />
+            <Route path="/postride" element={access_token ? <PostRide /> : <Navigate to="/login" />} />
+            <Route path="/yourrides" element={access_token ? <YourRides /> : <Navigate to="/login" />} />
+            <Route path="/messages" element={access_token ? <Messages /> : <Navigate to="/login" />} />
+            <Route path="/vehicles" element={access_token ? <Vehicles /> : <Navigate to="/login" />} />
+            <Route path="/userprofile" element={access_token ? <UserProfile /> : <Navigate to="/login" />} />
+            <Route path="/changepassword" element={access_token ? <ChangePassword /> : <Navigate to="/login" />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </>
-  )
+  );
 }
 
 export default App

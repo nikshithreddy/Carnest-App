@@ -12,12 +12,15 @@ import { useMediaQuery, useTheme } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import { useLoginUserMutation } from '../../services/userAuthApi';
 import { storeToken } from '../../services/LocalStorageService';
+import { useDispatch } from 'react-redux';
+import { setUserToken } from '../../features/authSlice';
 import Nav from '../../components/Nav';
 
 const Login = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [serverError, setServerError] = useState({});
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [loginUser, { isLoading }] = useLoginUserMutation();
@@ -42,9 +45,8 @@ const Login = () => {
         setServerError({});
         setLoginSuccess(true);
         storeToken(res.data.token);
-        setTimeout(() => {
-          navigate("/search");
-        }, 2000);
+        dispatch(setUserToken({ access_token: res.data.token.access }));
+        navigate("/search");
       }
     } catch (error) {
       setServerError({ non_field_errors: ['An unexpected error occurred. Please try again.'] });

@@ -14,21 +14,31 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import CarnestLogo from '../assets/car-sharing-logo.png';
- 
+import { useSelector } from 'react-redux';
+
 const Nav = () => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
- 
+  const { access_token } = useSelector((state) => state.auth);
+
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
- 
+
   const handleClose = () => {
     setAnchorEl(null);
-  }; 
+  };
+
+  const handleLogoClick = () => {
+    if (access_token) {
+      navigate('/search');
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <AppBar 
@@ -48,12 +58,13 @@ const Nav = () => {
           <img src={CarnestLogo} alt="Carnest Logo" style={{ height: '35px', marginRight: '5px', marginBottom: '10px' }} />
           <Typography 
             variant="h6" 
-            component={NavLink} 
-            to="/search"
+            component="div"
+            onClick={handleLogoClick}
             sx={{ 
               textDecoration: 'none', 
               color: theme.palette.text.primary,
-              fontFamily: theme.typography.fontFamily
+              fontFamily: theme.typography.fontFamily,
+              cursor: 'pointer'
             }}
           >
             Carnest

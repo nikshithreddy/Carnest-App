@@ -65,6 +65,19 @@ export const userAuthApi = createApi({
         }
       }
     }),
+    userProfile: builder.mutation({
+      query: (access_token) => {
+        return {
+          url: `/profile`,
+          method: 'GET',
+          headers: {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${access_token}`
+          }
+        }
+      }
+    }),
+
   }),
 });
 
@@ -73,5 +86,6 @@ export const {
   useLoginUserMutation, 
   useChangeUserPasswordMutation, 
   useSendPasswordResetEmailMutation, 
-  useResetPasswordMutation, 
+  useResetPasswordMutation,
+  useUserProfileMutation, 
 } = userAuthApi
