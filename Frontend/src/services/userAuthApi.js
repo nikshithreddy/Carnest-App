@@ -65,7 +65,7 @@ export const userAuthApi = createApi({
         }
       }
     }),
-    userProfile: builder.mutation({
+    userProfile: builder.query({
       query: (access_token) => {
         return {
           url: `/profile`,
@@ -77,7 +77,34 @@ export const userAuthApi = createApi({
         }
       }
     }),
+    updateUserProfile: builder.mutation({
+      query: ({actualData, access_token, user}) => {
+        return {
+          url: `/profile/${user}/`,
+          method: 'PATCH',
+          body: actualData,
+          headers: {
+            'Authorization': `Bearer ${access_token}`
+          },
+          validateStatus: (response, result) => {
+            console.log('API Response:', response, result);
+            return response.status < 500;
+          }
+        }
+      }
+    }),
 
+    getGovernmentIdTypes: builder.query({
+      query: (access_token) => {
+        return {
+          url: '/government-id-types/',
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${access_token}`
+          }
+        }
+      }
+    })
   }),
 });
 
@@ -87,5 +114,7 @@ export const {
   useChangeUserPasswordMutation, 
   useSendPasswordResetEmailMutation, 
   useResetPasswordMutation,
-  useUserProfileMutation, 
+  useUserProfileQuery,
+  useUpdateUserProfileMutation,
+  useGetGovernmentIdTypesQuery
 } = userAuthApi

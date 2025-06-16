@@ -4,6 +4,7 @@ from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeErr
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from users.utils import Util
+import re
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     #We are writing this because we need confirm password field in our Registration Request
@@ -81,7 +82,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             token = PasswordResetTokenGenerator().make_token(user)
             print("password Reset Token", token)
             # link = "https://carnest.us/api/user/reset/" + uid + "/" +token
-            link = 'http://localhost:5174/api/user/reset/'+uid+'/'+token
+            link = 'http://localhost:5175/api/user/reset/'+uid+'/'+token
             print("Password Reset Link", link)
             # Send EMail
             body = "Click Following Link to Reset Your Password " + link
@@ -129,6 +130,7 @@ class UserPasswordResetSerializer(serializers.Serializer):
         
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -139,7 +141,64 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "phone_number",
             "date_of_birth",
+            "government_id_type",
+            "government_id_number",
+            "profile_picture",
             "created_at",
+            "addressLat",
+            "addressLng",
             "address",
         ]
         read_only_fields = ["created_at"]
+
+    def get_profile_picture(self, obj):
+        if obj.profile_picture:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.profile_picture.url)
+            return obj.profile_picture.url
+        return None
+    
+    def validate(self, attrs):
+        government_id_type = attrs.get("government_id_type")
+        government_id_number = attrs.get("government_id_number")
+
+        # Only validate if both government_id_type and government_id_number are provided
+        if government_id_type and government_id_number:
+            valid_types = ["SSN", "Driver's License", "Passport"]
+
+            if government_id_type not in valid_types:
+                raise serializers.ValidationError(
+                    {
+                    "government_id_type": f"Invalid government ID type. Valid types are: {', '.join(valid_types)}."
+                    }
+                )
+            
+            # Validate SSN format
+            if government_id_type == "SSN" and not re.match(
+                r"^\d{3}-\d{2}-\d{4}$", government_id_number
+            ):
+                raise serializers.ValidationError({
+                    "government_id_number": "Invalid SSN format. Use XXX-XX-XXXX."
+                })
+            
+            # Validate Driver's License format (alphanumeric check)
+            if government_id_type == "Driver's License" and not re.match(
+                r'^[A-Z0-9]{1,9}$', government_id_number, re.IGNORECASE
+            ):
+                raise serializers.ValidationError({
+                    "government_id_number": "Invalid Driver's License format. Use 1 to 9 alphanumeric characters."
+                })
+            
+            # Validate Passport format
+            if government_id_type == "Passport" and not re.match(
+                r"^[A-Z0-9]{6,9}$", government_id_number
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "government_id_number": "Invalid Passport format. Use 6 to 9 uppercase letters and digits."
+                    }
+                )
+        return attrs
+            
+

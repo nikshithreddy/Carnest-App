@@ -86,7 +86,7 @@ class UserProfileView(APIView):
     def get(self, request, user_id=None, format=None):
         try:
             user = self.get_user(user_id) if user_id else request.user
-            serializer = UserProfileSerializer(user)
+            serializer = UserProfileSerializer(user, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Response as e:
             return e
@@ -94,10 +94,43 @@ class UserProfileView(APIView):
     def patch(self, request, user_id=None, format=None):
         try:
             user = self.get_user(user_id) if user_id else request.user
-            serializer = UserProfileSerializer(user, data=request.data, partial=True)
+            print("Received data:", request.data)  # Debug log
+            serializer = UserProfileSerializer(user, data=request.data, partial=True, context={'request': request})
             if serializer.is_valid():
+                print("Serializer is valid")  # Debug log
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
+            print("Serializer errors:", serializer.errors)  # Debug log
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Response as e:
             return e
+
+class GovernmentIDTypeView(APIView):
+    def get(self, request, format=None):
+        id_types = ["SSN", "Driver's License", "Passport"]
+        return Response(id_types, status=status.HTTP_200_OK)
+    
+
+class GetAllUsersView(APIView):
+    """
+    API View to retrive all users.
+    Only accessible by admin users.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+
+        if not request.user.is_admin:
+            return Response({'error': 'You do not have permission to perform this action.'}, status=status.HTTP_403_FORBIDDEN)
+        users = users.objects.all()
+        serializer = UserProfileSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class GovernmentIdTypesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get the choices from the model
+        id_types = [{"value": value, "label": label} for value, label in User.USA_ID_TYPE_CHOICES]
+        return Response(id_types)

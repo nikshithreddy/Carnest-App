@@ -21,7 +21,7 @@ import { Search, DirectionsCar, List, Message } from '@mui/icons-material';
 import { removeToken } from '../services/LocalStorageService';
 import { useSelector, useDispatch } from 'react-redux';
 import { unSetUserToken } from '../features/authSlice';
-import { useUserProfileMutation } from '../services/userAuthApi';
+import { useUserProfileQuery } from '../services/userAuthApi';
 
 
 const Navbar = () => {
@@ -34,7 +34,9 @@ const Navbar = () => {
   // Access the token and derive `isLoggedIn` from Redux state
   const { access_token, profile } = useSelector((state) => state.auth);
 
-  const [userProfile, { error, isLoading }] = useUserProfileMutation();
+  const { data, error, isLoading } = useUserProfileQuery(access_token, {
+    skip: !access_token
+  });
 
   const isLoggedIn = Boolean(access_token);
 

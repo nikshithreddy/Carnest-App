@@ -2,6 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     access_token: localStorage.getItem("access_token") || null,
+    profile: null,
+    govtIdTypes: ['Aadhar', 'PAN', 'Driving License', 'Passport']
 }
 
 export const authSlice = createSlice({
@@ -13,10 +15,13 @@ export const authSlice = createSlice({
         },
         unSetUserToken: (state, action) => {
             return initialState;
+        },
+        setProfile: (state, action) => {
+            state.profile = action.payload.profile
         }
     }
 })
 
-export const {setUserToken, unSetUserToken} = authSlice.actions
+export const {setUserToken, unSetUserToken, setProfile} = authSlice.actions
 
 export default authSlice.reducer

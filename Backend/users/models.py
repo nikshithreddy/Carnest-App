@@ -57,14 +57,32 @@ class UserManager(BaseUserManager):
 
 # Create your models here.
 class User(AbstractBaseUser):
+
+    USA_ID_TYPE_CHOICES = [
+        ("SSN", "Social Security Number"),
+        ("Driver's License", "Driver's License"),
+        ("Passport", "Passport"),
+    ]
     email = models.EmailField(verbose_name="Email", max_length=255, unique=True)
     first_name = models.CharField(max_length=30, default="None")
     last_name = models.CharField(max_length=30, blank=True,default="None")
     phone_number = models.CharField(max_length=15, unique=True,null=True, blank=True)
-    
+    profile_picture = models.ImageField(
+        upload_to='profile_pics/',
+        null=True,
+        blank=True
+    )
+
+
     #Personal details
     date_of_birth = models.DateField(null=True, blank=True)
     address= models.TextField(null=True, blank=True)
+    addressLat = models.TextField(null=True, blank=True)
+    addressLng = models.FloatField(null=True, blank=True)
+    government_id_type = models.CharField(
+        max_length=50, choices=USA_ID_TYPE_CHOICES, null=True, blank=True
+    )
+    government_id_number = models.CharField(max_length=50, null=True, blank=True)
 
     #Activity details
     last_modified_date = models.DateTimeField(auto_now=True)
@@ -81,3 +99,22 @@ class User(AbstractBaseUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "terms_and_conditions_accepted"]
+
+    def __str__(self):
+        return self.email
+    
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        return self.is_admin
+    
+    def has_module_perms(self, app_label):
+        "Does the user have permission to view the app 'app_label' ?"
+        return True
+    
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        return self.is_admin
+    
+
+    
