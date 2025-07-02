@@ -1,0 +1,62 @@
+# Byte-code files
+*.pyc
+__pycache__/
+*.pyd
+*.pyo
+
+# Virtual environment
+/venv
+/env
+/myenv
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Logs
+*.log
+
+# Database
+*.sqlite3
+/db.sqlite3
+/media # if you have a media folder for user uploads that you don't want versioned
+
+# Environment variables
+.env
+.flaskenv
+
+# IDEs
+.idea/             # JetBrains IDEs
+.vscode/           # VS Code
+*.iml              # IntelliJ IDEA
+*.swp              # Vim swap files
+*~                 # Backup files
+
+# macOS files
+.DS_Store
+
+# PyCharm test runners
+.pytest_cache/
+
+# Coverage reports
+.coverage
+/htmlcov/
+
+# pip-tools files
+*.in
+*.txt # If you use pip-tools and want to ignore generated requirements.txt
